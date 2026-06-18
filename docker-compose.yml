@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: teamhub-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: teamhub
+      POSTGRES_PASSWORD: teamhub
+      POSTGRES_DB: teamhub
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U teamhub -d teamhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: teamhub-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://teamhub:teamhub@postgres:5432/teamhub?schema=public
+      PORT: 4000
+      FRONTEND_URL: http://localhost:5173
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        VITE_GRAPHQL_URL: http://localhost:4000/graphql
+    container_name: teamhub-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres-data:
