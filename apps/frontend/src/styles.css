@@ -185,6 +185,54 @@ h1 {
   color: #b42318;
 }
 
+/* Neues Projekt Formular */
+
+.create-project {
+  display: grid;
+  gap: 12px;
+
+  margin-bottom: 24px;
+  padding: 22px;
+
+  border: 1px solid #d9e1ef;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.create-project h2 {
+  margin: 0;
+}
+
+.create-project input {
+  width: 100%;
+
+  padding: 12px 14px;
+
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+
+  font-size: 1rem;
+}
+
+.create-project button {
+  width: fit-content;
+
+  padding: 12px 18px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #2563eb;
+  color: white;
+
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.create-project button:hover {
+  background: #1d4ed8;
+}
+
 @media (max-width: 720px) {
   .shell {
     width: min(100% - 24px, 1120px);

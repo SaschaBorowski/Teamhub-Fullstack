@@ -1,4 +1,5 @@
-import { gql, useQuery } from '@apollo/client';
+import { gql, useMutation, useQuery } from '@apollo/client';
+import { useState } from 'react';
 
 const PROJECTS_QUERY = gql`
   query Projects {
@@ -11,6 +12,16 @@ const PROJECTS_QUERY = gql`
         title
         status
       }
+    }
+  }
+`;
+
+const CREATE_PROJECT = gql`
+  mutation CreateProject($input: CreateProjectInput!) {
+    createProject(input: $input) {
+      id
+      name
+      description
     }
   }
 `;
@@ -35,7 +46,33 @@ const statusLabel: Record<Task['status'], string> = {
 };
 
 export default function App() {
-  const { data, loading, error } = useQuery<{ projects: Project[] }>(PROJECTS_QUERY);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+
+  const { data, loading, error } =
+    useQuery<{ projects: Project[] }>(PROJECTS_QUERY);
+
+  const [createProject] = useMutation(CREATE_PROJECT, {
+    refetchQueries: [{ query: PROJECTS_QUERY }],
+  });
+
+  const handleCreateProject = async () => {
+    if (!name.trim()) {
+      return;
+    }
+
+    await createProject({
+      variables: {
+        input: {
+          name,
+          description,
+        },
+      },
+    });
+
+    setName('');
+    setDescription('');
+  };
 
   return (
     <main className="shell">
@@ -63,6 +100,28 @@ export default function App() {
           ) : (
             <p className="state">No projects yet. Create one through the GraphQL API.</p>
           ))}
+      </section>
+
+      <section className="create-project">
+        <h2>Neues Projekt</h2>
+
+        <input
+          type="text"
+          placeholder="Projektname"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        <input
+          type="text"
+          placeholder="Beschreibung"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+
+        <button onClick={handleCreateProject}>
+          Projekt erstellen
+        </button>
       </section>
     </main>
   );
