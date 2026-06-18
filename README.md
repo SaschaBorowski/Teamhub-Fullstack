@@ -1,121 +1,141 @@
 # TeamHub
 
-TeamHub is a project management tool scaffolded as a TypeScript monorepo.
+TeamHub is a full-stack project management application that I am building to improve my skills in modern web development and cloud-native technologies.
 
-## Stack
+The goal of this project is to gain practical experience with:
 
-- React 19
-- TypeScript
-- Vite
-- NestJS
-- GraphQL with Apollo
-- PostgreSQL
-- Prisma
-- Docker and Docker Compose
+* React
+* TypeScript
+* GraphQL
+* NestJS
+* Prisma
+* PostgreSQL
+* Docker
+* Kubernetes (planned)
+* Azure / Google Cloud Platform (planned)
+
+## Current Features
+
+* Project dashboard
+* GraphQL API
+* PostgreSQL persistence
+* Project creation
+* Task management foundation
+* Dockerized database
+
+## Tech Stack
+
+### Frontend
+
+* React 19
+* TypeScript
+* Vite
+* Apollo Client
+
+### Backend
+
+* NestJS
+* GraphQL
+* Prisma ORM
+
+### Database
+
+* PostgreSQL
+
+### Infrastructure
+
+* Docker
+* Docker Compose
+
+## Architecture
+
+```text
+React
+  ↓
+Apollo Client
+  ↓
+GraphQL API
+  ↓
+NestJS
+  ↓
+Prisma
+  ↓
+PostgreSQL
+```
 
 ## Project Structure
 
 ```text
 teamhub/
   apps/
-    frontend/   React + Vite + Apollo Client
-    backend/    NestJS + GraphQL + Prisma
+    frontend/
+    backend/
   docker-compose.yml
-  package.json
 ```
 
-## Prerequisites
+## Local Development
 
-- Node.js 20.11 or newer
-- npm 10 or newer
-- Docker and Docker Compose
+### Prerequisites
 
-## Local Setup
+* Node.js 20+
+* npm
+* Docker Desktop
 
-1. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-2. Create environment files:
-
-   ```bash
-   cp .env.example .env
-   cp .env.example apps/backend/.env
-   ```
-
-3. Start PostgreSQL:
-
-   ```bash
-   docker compose up postgres -d
-   ```
-
-4. Generate the Prisma client and run migrations:
-
-   ```bash
-   npm run prisma:generate
-   npm run prisma:migrate
-   ```
-
-5. Start both apps:
-
-   ```bash
-   npm run dev
-   ```
-
-The frontend runs at `http://localhost:5173`.
-The GraphQL API runs at `http://localhost:4000/graphql`.
-
-For frontend-only configuration, create `apps/frontend/.env.local` and set:
+### Install dependencies
 
 ```bash
-VITE_GRAPHQL_URL="http://localhost:4000/graphql"
+npm install
 ```
 
-## Docker Setup
-
-Build and run the full stack:
+### Start PostgreSQL
 
 ```bash
-docker compose up --build
+docker compose up -d postgres
 ```
 
-Stop the stack:
+### Run database migrations
 
 ```bash
-docker compose down
+cd apps/backend
+npx prisma migrate dev
 ```
 
-To remove the database volume as well:
+### Start the backend
 
 ```bash
-docker compose down -v
-```
-
-## Useful Commands
-
-```bash
+cd apps/backend
 npm run dev
-npm run build
-npm run lint
-npm run format
-npm run prisma:generate
-npm run prisma:migrate
 ```
 
-## Backend Notes
+### Start the frontend
 
-The backend exposes a small project/task GraphQL API:
+```bash
+cd apps/frontend
+npm run dev
+```
 
-- `projects`
-- `project(id: ID!)`
-- `createProject(input: CreateProjectInput!)`
-- `createTask(input: CreateTaskInput!)`
-- `updateTaskStatus(id: ID!, status: TaskStatus!)`
+Frontend:
+http://localhost:5173
 
-Prisma schema and migrations live in `apps/backend/prisma`.
+GraphQL:
+http://localhost:4000/graphql
 
-## Frontend Notes
+## Roadmap
 
-The frontend uses Apollo Client to read projects from the backend and render a compact dashboard.
+* [x] React frontend
+* [x] NestJS backend
+* [x] GraphQL API
+* [x] PostgreSQL integration
+* [x] Docker setup
+* [ ] Create projects from UI
+* [ ] Create tasks from UI
+* [ ] Drag & Drop Kanban board
+* [ ] Authentication
+* [ ] NGINX reverse proxy
+* [ ] Kubernetes deployment
+* [ ] Azure deployment
+* [ ] CI/CD pipeline
+
+## Learning Goals
+
+This project serves as a practical learning platform for full-stack development, backend architecture, containerization, cloud infrastructure, and deployment workflows.
