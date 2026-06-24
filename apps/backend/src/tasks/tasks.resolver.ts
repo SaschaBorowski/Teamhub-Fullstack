@@ -27,4 +27,12 @@ export class TasksResolver {
     return this.tasksService.delete(id);
 
   }
+
+  @Mutation(() => Task)
+  updateTaskTitle(
+    @Args('id', { type: () => ID }) id: string,
+    @Args('title') title: string,
+  ) {
+    return this.tasksService.updateTitle(id, title);
+  }
 }

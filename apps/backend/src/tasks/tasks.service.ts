@@ -20,6 +20,13 @@ export class TasksService {
     });
   }
 
+  updateTitle(id: string, title: string) {
+    return this.prisma.task.update({
+      where: { id },
+      data: { title },
+    });
+  }
+
   delete(id: string) {
     return this.prisma.task.delete({
       where: { id },
