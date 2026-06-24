@@ -14,6 +14,7 @@ const PROJECTS_QUERY = gql`
       tasks {
         id
         title
+        description
         status
       }
     }
@@ -52,10 +53,19 @@ const DELETE_TASK = gql`
 `;
 
 const UPDATE_TASK_TITLE = gql`
-  mutation UpdateTaskTitle($id: ID!, $title: String!) {
-    updateTaskTitle(id: $id, title: $title) {
+  mutation UpdateTaskTitle(
+    $id: ID!
+    $title: String!
+    $description: String!
+  ) {
+    updateTaskTitle(
+      id: $id
+      title: $title
+      description: $description
+    ) {
       id
       title
+      description
     }
   }
 `;
@@ -67,11 +77,12 @@ const UPDATE_TASK_TITLE = gql`
 const CREATE_TASK = gql`
   mutation CreateTask($input: CreateTaskInput!) {
     createTask(input: $input) {
-      id
-      title
-      status
-      projectId
-    }
+        id
+        title
+        description
+        status
+        projectId
+}
   }
 `;
 
@@ -81,6 +92,7 @@ const CREATE_TASK = gql`
 type Task = {
   id: string;
   title: string;
+  description?: string | null;
   status: 'TODO' | 'IN_PROGRESS' | 'DONE';
 };
 
@@ -117,6 +129,8 @@ export default function App() {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
   const [editedTitle, setEditedTitle] = useState('');
+
+  const [editedDescription, setEditedDescription] = useState('');
 
   // Lädt alle Projekte vom Backend
   const { data, loading, error } =
@@ -178,7 +192,8 @@ export default function App() {
   // Task erstellen
   const handleCreateTask = async (
     projectId: string,
-    title: string
+    title: string,
+    description: string
   ) => {
     if (!title.trim()) {
       return;
@@ -188,6 +203,7 @@ export default function App() {
       variables: {
         input: {
           title,
+          description,
           projectId,
         },
       },
@@ -216,12 +232,14 @@ export default function App() {
 
   const handleUpdateTaskTitle = async (
     taskId: string,
-    title: string
+    title: string,
+    description: string
   ) => {
     await updateTaskTitle({
       variables: {
         id: taskId,
         title,
+        description,
       },
     });
   };
@@ -276,6 +294,8 @@ export default function App() {
                 editedTitle={editedTitle}
                 setEditedTitle={setEditedTitle}
                 handleUpdateTaskTitle={handleUpdateTaskTitle}
+                editedDescription={editedDescription}
+                setEditedDescription={setEditedDescription}
               />
             ))
           ) : (
@@ -330,11 +350,14 @@ function ProjectCard({
   editedTitle,
   setEditedTitle,
   handleUpdateTaskTitle,
+  editedDescription,
+  setEditedDescription,
 }: {
   project: Project;
   handleCreateTask: (
     projectId: string,
-    title: string
+    title: string,
+    description: string
   ) => Promise<void>;
   handleUpdateTaskStatus: (
     taskId: string,
@@ -345,16 +368,28 @@ function ProjectCard({
   setEditingTaskId: React.Dispatch<
     React.SetStateAction<string | null>
   >;
+
   editedTitle: string;
   setEditedTitle: React.Dispatch<
     React.SetStateAction<string>
   >;
+
   handleUpdateTaskTitle: (
     taskId: string,
-    title: string
+    title: string,
+    description: string
   ) => Promise<void>;
+
+  editedDescription: string;
+
+  setEditedDescription: React.Dispatch<
+    React.SetStateAction<string>
+  >;
 }) {
+
   const [taskTitle, setTaskTitle] = useState('');
+  const [taskDescription, setTaskDescription] = useState('');
+
   return (
     <article className="project-card">
 
@@ -383,7 +418,7 @@ function ProjectCard({
 
             {/* Titel */}
             {editingTaskId === task.id ? (
-              <>
+              <div className="task-edit">
                 <input
                   type="text"
                   value={editedTitle}
@@ -392,7 +427,8 @@ function ProjectCard({
                     if (e.key === 'Enter') {
                       await handleUpdateTaskTitle(
                         task.id,
-                        editedTitle
+                        editedTitle,
+                        editedDescription
                       );
 
                       setEditingTaskId(null);
@@ -401,63 +437,90 @@ function ProjectCard({
                   }}
                 />
 
-                <button
-                  onClick={async () => {
-                    await handleUpdateTaskTitle(
-                      task.id,
-                      editedTitle
-                    );
+                <textarea
+                  value={editedDescription}
+                  onChange={(e) =>
+                    setEditedDescription(e.target.value)
+                  }
+                  placeholder="Beschreibung"
+                />
 
-                    setEditingTaskId(null);
-                  }}
-                >
-                  💾
-                </button>
+                <div className="task-edit-actions">
+                  <button
+                    onClick={async () => {
+                      await handleUpdateTaskTitle(
+                        task.id,
+                        editedTitle,
+                        editedDescription
+                      );
 
-                <button
-                  onClick={() => {
-                    setEditingTaskId(null);
-                    setEditedTitle('');
-                  }}
-                >
-                  ❌
-                </button>
-              </>
+                      setEditingTaskId(null);
+                    }}
+                  >
+                    💾
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setEditingTaskId(null);
+                      setEditedTitle('');
+                    }}
+                  >
+                    ❌
+                  </button>
+                </div>
+              </div>
             ) : (
-              <span>{task.title}</span>
+              <div className="task-content">
+                <span className="task-title">
+                  {task.title}
+                </span>
+
+                {task.description && (
+                  <p className="task-description">
+                    {task.description}
+                  </p>
+                )}
+              </div>
             )}
 
             {/* Status */}
-            <select
-              value={task.status}
-              onChange={(e) =>
-                handleUpdateTaskStatus(
-                  task.id,
-                  e.target.value as Task['status']
-                )
-              }
-            >
-              <option value="TODO">Todo</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="DONE">Done</option>
-            </select>
+            <div className="task-actions">
 
-            {editingTaskId !== task.id && (
-              <button
-                onClick={() => {
-                  setEditingTaskId(task.id);
-                  setEditedTitle(task.title);
-                }}
+              {/* Status */}
+              <select
+                value={task.status}
+                onChange={(e) =>
+                  handleUpdateTaskStatus(
+                    task.id,
+                    e.target.value as Task['status']
+                  )
+                }
               >
-                ✏️
-              </button>
-            )}
+                <option value="TODO">Todo</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="DONE">Done</option>
+              </select>
 
-            <button
-              onClick={() => handleDeleteTask(task.id)}
-            >
-              🗑
-            </button>
+              {editingTaskId !== task.id && (
+                <button
+                  onClick={() => {
+                    setEditingTaskId(task.id);
+                    setEditedTitle(task.title);
+                    setEditedDescription(task.description ?? '');
+                  }}
+                >
+                  ✏️
+                </button>
+              )}
+
+              <button
+                onClick={() => handleDeleteTask(task.id)}
+              >
+                🗑
+              </button>
+
+            </div>
 
           </li>
 
@@ -465,7 +528,7 @@ function ProjectCard({
 
       </ul>
 
-      <div style={{ marginTop: '12px' }}>
+      <div className="task-create">
         <input
           type="text"
           placeholder="Neuer Task"
@@ -475,22 +538,34 @@ function ProjectCard({
             if (e.key === 'Enter') {
               await handleCreateTask(
                 project.id,
-                taskTitle
+                taskTitle,
+                taskDescription
               );
 
               setTaskTitle('');
+              setTaskDescription('');
             }
           }}
+        />
+
+        <textarea
+          placeholder="Beschreibung"
+          value={taskDescription}
+          onChange={(e) =>
+            setTaskDescription(e.target.value)
+          }
         />
 
         <button
           onClick={async () => {
             await handleCreateTask(
               project.id,
-              taskTitle
+              taskTitle,
+              taskDescription
             );
 
             setTaskTitle('');
+            setTaskDescription('');
           }}
         >
           Task hinzufügen

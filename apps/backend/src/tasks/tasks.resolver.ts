@@ -32,7 +32,12 @@ export class TasksResolver {
   updateTaskTitle(
     @Args('id', { type: () => ID }) id: string,
     @Args('title') title: string,
+    @Args('description') description: string,
   ) {
-    return this.tasksService.updateTitle(id, title);
+    return this.tasksService.updateTitle(
+      id,
+      title,
+      description,
+    );
   }
 }
