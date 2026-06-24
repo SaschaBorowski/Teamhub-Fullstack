@@ -21,6 +21,7 @@ scalar DateTime
 type Mutation {
   createProject(input: CreateProjectInput!): Project!
   createTask(input: CreateTaskInput!): Task!
+  deleteTask(id: ID!): Task!
   updateTaskStatus(id: ID!, status: TaskStatus!): Task!
 }
 

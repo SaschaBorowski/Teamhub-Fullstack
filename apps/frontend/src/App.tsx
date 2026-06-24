@@ -43,6 +43,14 @@ const UPDATE_TASK_STATUS = gql`
   }
 `;
 
+const DELETE_TASK = gql`
+  mutation DeleteTask($id: ID!) {
+    deleteTask(id: $id) {
+      id
+    }
+  }
+`;
+
 // =====================================
 // GraphQL Mutation
 // Erstellt einen neuen Task
@@ -119,6 +127,11 @@ export default function App() {
     refetchQueries: [{ query: PROJECTS_QUERY }],
   });
 
+  // Mutation zum löschen der Tasks
+  const [deleteTask] = useMutation(DELETE_TASK, {
+    refetchQueries: [{ query: PROJECTS_QUERY }],
+  });
+
   // =====================================
   // Projekt speichern
   // Wird durch den Button ausgelöst
@@ -175,6 +188,14 @@ export default function App() {
     });
   };
 
+  const handleDeleteTask = async (taskId: string) => {
+    await deleteTask({
+      variables: {
+        id: taskId,
+      },
+    });
+  };
+
   // =====================================
   // UI anzeigen
   // =====================================
@@ -219,6 +240,7 @@ export default function App() {
                 project={project}
                 handleCreateTask={handleCreateTask}
                 handleUpdateTaskStatus={handleUpdateTaskStatus}
+                handleDeleteTask={handleDeleteTask}
                 taskTitle={taskTitle}
                 setTaskTitle={setTaskTitle}
               />
@@ -269,6 +291,7 @@ function ProjectCard({
   project,
   handleCreateTask,
   handleUpdateTaskStatus,
+  handleDeleteTask,
   taskTitle,
   setTaskTitle,
 }: {
@@ -278,6 +301,7 @@ function ProjectCard({
     taskId: string,
     status: Task['status']
   ) => Promise<void>;
+  handleDeleteTask: (taskId: string) => Promise<void>;
   taskTitle: string;
   setTaskTitle: React.Dispatch<React.SetStateAction<string>>;
 }) {
@@ -325,13 +349,18 @@ function ProjectCard({
               <option value="DONE">Done</option>
             </select>
 
+            <button
+              onClick={() => handleDeleteTask(task.id)}
+            >
+              🗑
+            </button>
+
           </li>
 
         ))}
 
       </ul>
 
-      {/* 🟥 Task erstellen */}
       <div style={{ marginTop: '12px' }}>
         <input
           type="text"

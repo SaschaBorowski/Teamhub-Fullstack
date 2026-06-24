@@ -6,7 +6,7 @@ import { TasksService } from './tasks.service';
 
 @Resolver(() => Task)
 export class TasksResolver {
-  constructor(private readonly tasksService: TasksService) {}
+  constructor(private readonly tasksService: TasksService) { }
 
   @Mutation(() => Task)
   createTask(@Args('input') input: CreateTaskInput) {
@@ -19,5 +19,12 @@ export class TasksResolver {
     @Args('status', { type: () => TaskStatus }) status: keyof typeof TaskStatus,
   ) {
     return this.tasksService.updateStatus(id, status);
+  }
+  @Mutation(() => Task)
+  deleteTask(
+    @Args('id', { type: () => ID }) id: string,
+  ) {
+    return this.tasksService.delete(id);
+
   }
 }

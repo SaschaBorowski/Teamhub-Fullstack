@@ -5,7 +5,7 @@ import { TaskStatus } from './models/task-status.enum';
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   create(input: CreateTaskInput) {
     return this.prisma.task.create({
@@ -17,6 +17,12 @@ export class TasksService {
     return this.prisma.task.update({
       where: { id },
       data: { status },
+    });
+  }
+
+  delete(id: string) {
+    return this.prisma.task.delete({
+      where: { id },
     });
   }
 }
