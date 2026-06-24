@@ -127,8 +127,8 @@ http://localhost:4000/graphql
 * [x] GraphQL API
 * [x] PostgreSQL integration
 * [x] Docker setup
-* [ ] Create projects from UI
-* [ ] Create tasks from UI
+* [X] Create projects from UI
+* [X] Create tasks from UI
 * [ ] Drag & Drop Kanban board
 * [ ] Authentication
 * [ ] NGINX reverse proxy
