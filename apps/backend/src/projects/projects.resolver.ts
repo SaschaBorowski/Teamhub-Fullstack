@@ -5,7 +5,7 @@ import { ProjectsService } from './projects.service';
 
 @Resolver(() => Project)
 export class ProjectsResolver {
-  constructor(private readonly projectsService: ProjectsService) {}
+  constructor(private readonly projectsService: ProjectsService) { }
 
   @Query(() => [Project])
   projects() {
@@ -21,4 +21,12 @@ export class ProjectsResolver {
   createProject(@Args('input') input: CreateProjectInput) {
     return this.projectsService.create(input);
   }
+
+  @Mutation(() => Project)
+  deleteProject(
+    @Args('id', { type: () => ID }) id: string,
+  ) {
+    return this.projectsService.delete(id);
+  }
+
 }

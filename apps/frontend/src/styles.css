@@ -305,6 +305,12 @@ h1 {
   gap: 8px;
 }
 
+.project-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 @media (max-width: 720px) {
   .shell {
     width: min(100% - 24px, 1120px);

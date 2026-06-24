@@ -4,7 +4,7 @@ import { CreateProjectInput } from './dto/create-project.input';
 
 @Injectable()
 export class ProjectsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   findAll() {
     return this.prisma.project.findMany({
@@ -24,6 +24,12 @@ export class ProjectsService {
     return this.prisma.project.create({
       data: input,
       include: { tasks: true },
+    });
+  }
+
+  delete(id: string) {
+    return this.prisma.project.delete({
+      where: { id },
     });
   }
 }

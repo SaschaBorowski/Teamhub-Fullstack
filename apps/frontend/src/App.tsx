@@ -52,6 +52,14 @@ const DELETE_TASK = gql`
   }
 `;
 
+const DELETE_PROJECT = gql`
+  mutation DeleteProject($id: ID!) {
+    deleteProject(id: $id) {
+      id
+    }
+  }
+`;
+
 const UPDATE_TASK_TITLE = gql`
   mutation UpdateTaskTitle(
     $id: ID!
@@ -163,6 +171,13 @@ export default function App() {
     refetchQueries: [{ query: PROJECTS_QUERY }],
   });
 
+  const [deleteProject] = useMutation(
+    DELETE_PROJECT,
+    {
+      refetchQueries: [{ query: PROJECTS_QUERY }],
+    }
+  );
+
   // =====================================
   // Projekt speichern
   // Wird durch den Button ausgelöst
@@ -226,6 +241,24 @@ export default function App() {
     await deleteTask({
       variables: {
         id: taskId,
+      },
+    });
+  };
+
+  const handleDeleteProject = async (
+    projectId: string
+  ) => {
+    if (
+      !confirm(
+        'Projekt wirklich löschen? Alle Tasks gehen verloren.'
+      )
+    ) {
+      return;
+    }
+
+    await deleteProject({
+      variables: {
+        id: projectId,
       },
     });
   };
@@ -296,6 +329,7 @@ export default function App() {
                 handleUpdateTaskTitle={handleUpdateTaskTitle}
                 editedDescription={editedDescription}
                 setEditedDescription={setEditedDescription}
+                handleDeleteProject={handleDeleteProject}
               />
             ))
           ) : (
@@ -345,6 +379,7 @@ function ProjectCard({
   handleCreateTask,
   handleUpdateTaskStatus,
   handleDeleteTask,
+  handleDeleteProject,
   editingTaskId,
   setEditingTaskId,
   editedTitle,
@@ -364,6 +399,9 @@ function ProjectCard({
     status: Task['status']
   ) => Promise<void>;
   handleDeleteTask: (taskId: string) => Promise<void>;
+  handleDeleteProject: (
+    projectId: string
+  ) => Promise<void>;
   editingTaskId: string | null;
   setEditingTaskId: React.Dispatch<
     React.SetStateAction<string | null>
@@ -406,7 +444,19 @@ function ProjectCard({
         </div>
 
         {/* Anzahl der Tasks */}
-        <span>{project.tasks.length} tasks</span>
+        <div className="project-actions">
+          <span>
+            {project.tasks.length} tasks
+          </span>
+
+          <button
+            onClick={() =>
+              handleDeleteProject(project.id)
+            }
+          >
+            🗑️
+          </button>
+        </div>
       </div>
 
       {/* Liste aller Tasks */}
