@@ -34,6 +34,15 @@ const CREATE_PROJECT = gql`
   }
 `;
 
+const UPDATE_TASK_STATUS = gql`
+  mutation UpdateTaskStatus($id: ID!, $status: TaskStatus!) {
+    updateTaskStatus(id: $id, status: $status) {
+      id
+      status
+    }
+  }
+`;
+
 // =====================================
 // GraphQL Mutation
 // Erstellt einen neuen Task
@@ -105,6 +114,11 @@ export default function App() {
     refetchQueries: [{ query: PROJECTS_QUERY }],
   });
 
+  // Mutation zum updaten des Taskstatus
+  const [updateTaskStatus] = useMutation(UPDATE_TASK_STATUS, {
+    refetchQueries: [{ query: PROJECTS_QUERY }],
+  });
+
   // =====================================
   // Projekt speichern
   // Wird durch den Button ausgelöst
@@ -147,6 +161,18 @@ export default function App() {
     });
 
     setTaskTitle('');
+  };
+
+  const handleUpdateTaskStatus = async (
+    taskId: string,
+    status: Task['status']
+  ) => {
+    await updateTaskStatus({
+      variables: {
+        id: taskId,
+        status,
+      },
+    });
   };
 
   // =====================================
@@ -192,6 +218,7 @@ export default function App() {
                 key={project.id}
                 project={project}
                 handleCreateTask={handleCreateTask}
+                handleUpdateTaskStatus={handleUpdateTaskStatus}
                 taskTitle={taskTitle}
                 setTaskTitle={setTaskTitle}
               />
@@ -241,11 +268,16 @@ export default function App() {
 function ProjectCard({
   project,
   handleCreateTask,
+  handleUpdateTaskStatus,
   taskTitle,
   setTaskTitle,
 }: {
   project: Project;
   handleCreateTask: (projectId: string) => Promise<void>;
+  handleUpdateTaskStatus: (
+    taskId: string,
+    status: Task['status']
+  ) => Promise<void>;
   taskTitle: string;
   setTaskTitle: React.Dispatch<React.SetStateAction<string>>;
 }) {
@@ -279,9 +311,19 @@ function ProjectCard({
             <span>{task.title}</span>
 
             {/* Status */}
-            <small data-status={task.status}>
-              {statusLabel[task.status]}
-            </small>
+            <select
+              value={task.status}
+              onChange={(e) =>
+                handleUpdateTaskStatus(
+                  task.id,
+                  e.target.value as Task['status']
+                )
+              }
+            >
+              <option value="TODO">Todo</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="DONE">Done</option>
+            </select>
 
           </li>
 
