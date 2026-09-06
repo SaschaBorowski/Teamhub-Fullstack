@@ -9,7 +9,7 @@ export class ProjectsService {
   findAll() {
     return this.prisma.project.findMany({
       include: { tasks: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { sortOrder: 'asc' },
     });
   }
 
@@ -20,9 +20,19 @@ export class ProjectsService {
     });
   }
 
-  create(input: CreateProjectInput) {
+  async create(input: CreateProjectInput) {
+    const lastProject = await this.prisma.project.findFirst({
+      orderBy: { sortOrder: 'desc' },
+      select: { sortOrder: true },
+    });
+
+    const sortOrder = (lastProject?.sortOrder ?? -1) + 1;
+
     return this.prisma.project.create({
-      data: input,
+      data: {
+        ...input,
+        sortOrder,
+      },
       include: { tasks: true },
     });
   }
@@ -39,6 +49,16 @@ export class ProjectsService {
       data: {
         name,
         description,
+      },
+      include: { tasks: true },
+    });
+  }
+
+  reorder(id: string, sortOrder: number) {
+    return this.prisma.project.update({
+      where: { id },
+      data: {
+        sortOrder,
       },
       include: { tasks: true },
     });

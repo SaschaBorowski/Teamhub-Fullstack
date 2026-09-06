@@ -1,5 +1,5 @@
 import { gql, useMutation, useQuery } from '@apollo/client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // =====================================
 // GraphQL Query
@@ -10,6 +10,7 @@ const PROJECTS_QUERY = gql`
     projects {
       id
       name
+      sortOrder
       description
       tasks {
         id
@@ -78,6 +79,15 @@ const UPDATE_PROJECT = gql`
   }
 `;
 
+const REORDER_PROJECT = gql`
+  mutation ReorderProject($id: ID!, $sortOrder: Int!) {
+    reorderProject(id: $id, sortOrder: $sortOrder) {
+      id
+      sortOrder
+    }
+  }
+`;
+
 const UPDATE_TASK_TITLE = gql`
   mutation UpdateTaskTitle(
     $id: ID!
@@ -128,6 +138,7 @@ type Task = {
 type Project = {
   id: string;
   name: string;
+  sortOrder: number;
   description?: string | null;
   tasks: Task[];
 };
@@ -162,9 +173,73 @@ export default function App() {
   const [editedProjectName, setEditedProjectName] = useState('');
   const [editedProjectDescription, setEditedProjectDescription] = useState('');
 
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [draggedProjectId, setDraggedProjectId] = useState<string | null>(null);
+  const handleDrop = async (targetProjectId: string) => {
+    if (!draggedProjectId || draggedProjectId === targetProjectId) {
+      return;
+    }
+
+    const draggedIndex = projects.findIndex(
+      (project) => project.id === draggedProjectId
+    );
+
+    const targetIndex = projects.findIndex(
+      (project) => project.id === targetProjectId
+    );
+
+    if (draggedIndex === -1 || targetIndex === -1) {
+      return;
+    }
+
+    const draggedProject = projects[draggedIndex];
+    const targetProject = projects[targetIndex];
+
+    const newProjects = [...projects];
+
+    // Projekte 1:1 tauschen
+    newProjects[draggedIndex] = {
+      ...targetProject,
+      sortOrder: draggedProject.sortOrder,
+    };
+
+    newProjects[targetIndex] = {
+      ...draggedProject,
+      sortOrder: targetProject.sortOrder,
+    };
+
+    // Neue Reihenfolge sofort anzeigen
+    setProjects(newProjects);
+
+    // Neue Positionen dauerhaft speichern
+    await reorderProject({
+      variables: {
+        id: draggedProject.id,
+        sortOrder: targetProject.sortOrder,
+      },
+    });
+
+    await reorderProject({
+      variables: {
+        id: targetProject.id,
+        sortOrder: draggedProject.sortOrder,
+      },
+    });
+
+    // Drag-Status zurücksetzen
+    setDraggedProjectId(null);
+  };
+
   // Lädt alle Projekte vom Backend
   const { data, loading, error } =
     useQuery<{ projects: Project[] }>(PROJECTS_QUERY);
+
+  // Synchronisiert die Projekte aus GraphQL mit dem lokalen State
+  useEffect(() => {
+    if (data?.projects) {
+      setProjects(data.projects);
+    }
+  }, [data]);
 
   // Mutation zum Erstellen eines Projekts
   const [createProject] = useMutation(CREATE_PROJECT, {
@@ -172,6 +247,10 @@ export default function App() {
   });
 
   const [updateProject] = useMutation(UPDATE_PROJECT, {
+    refetchQueries: [{ query: PROJECTS_QUERY }],
+  });
+
+  const [reorderProject] = useMutation(REORDER_PROJECT, {
     refetchQueries: [{ query: PROJECTS_QUERY }],
   });
 
@@ -350,7 +429,11 @@ export default function App() {
       <section className="dashboard" aria-label="Projects">
 
         {/* Wird während des Ladens angezeigt */}
-        {loading && <p className="state">Loading projects...</p>}
+        {loading && (
+          <div className="state">
+            Loading projects...
+          </div>
+        )}
 
         {/* Wird bei Fehlern angezeigt */}
         {error && <p className="state error">Could not load projects. Is the API running?</p>}
@@ -359,10 +442,12 @@ export default function App() {
         {!loading &&
           !error &&
           (data?.projects.length ? (
-            data.projects.map((project) => (
+            projects.map((project) => (
               <ProjectCard
                 key={project.id}
                 project={project}
+                onDragStart={() => setDraggedProjectId(project.id)}
+                onDrop={() => handleDrop(project.id)}
                 handleCreateTask={handleCreateTask}
                 handleUpdateTaskStatus={handleUpdateTaskStatus}
                 handleDeleteTask={handleDeleteTask}
@@ -385,7 +470,7 @@ export default function App() {
             ))
           ) : (
             <p className="state">
-              No projects yet. Create one through the GraphQL API.
+              Noch keine Projekte vorhanden. Erstelle unten dein erstes Projekt.
             </p>
           ))}
       </section>
@@ -428,6 +513,8 @@ export default function App() {
 // =====================================
 function ProjectCard({
   project,
+  onDragStart,
+  onDrop,
   handleCreateTask,
   handleUpdateTaskStatus,
   handleDeleteTask,
@@ -448,6 +535,8 @@ function ProjectCard({
   setEditedDescription,
 }: {
   project: Project;
+  onDragStart: () => void;
+  onDrop: () => void;
   handleCreateTask: (
     projectId: string,
     title: string,
@@ -512,7 +601,13 @@ function ProjectCard({
   const [taskDescription, setTaskDescription] = useState('');
 
   return (
-    <article className="project-card">
+    <article
+      className="project-card"
+      draggable
+      onDragStart={onDragStart}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={onDrop}
+    >
 
       {/* Projektkopf */}
       <div className="project-header">

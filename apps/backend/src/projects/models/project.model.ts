@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Task } from '../../tasks/models/task.model';
 
 @ObjectType()
@@ -8,6 +8,9 @@ export class Project {
 
   @Field()
   name!: string;
+
+  @Field(() => Int)
+  sortOrder: number;
 
   @Field(() => String, { nullable: true })
   description?: string | null;

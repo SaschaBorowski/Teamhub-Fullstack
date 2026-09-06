@@ -226,16 +226,18 @@ h1 {
 }
 
 .state {
-  grid-column: 1 / -1;
-  padding: 18px;
-  border: 1px solid #d9e1ef;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #475467;
+  padding: 20px;
+  border-radius: 12px;
+  background: #181b23;
+  border: 1px solid #272c36;
+  color: #94a3b8;
+  text-align: center;
 }
 
 .error {
-  color: #b42318;
+  color: #f87171;
+  background: #2a171b;
+  border-color: #5a252d;
 }
 
 /* Neues Projekt Formular */
@@ -244,7 +246,7 @@ h1 {
   display: grid;
   gap: 12px;
 
-  margin-top: 24px;
+  margin-top: 32px;
   margin-bottom: 24px;
   padding: 22px;
 
@@ -461,11 +463,49 @@ h1 {
     padding: 16px;
   }
 
+  .project-card button {
+    min-width: 42px;
+    min-height: 42px;
+  }
+
   .project-card input,
   .project-card textarea,
-  .create-project input {
+  .create-project input,
+  .task-create input,
+  .task-create textarea,
+  .task-edit input,
+  .task-edit textarea {
     font-size: 1rem;
     padding: 12px;
+  }
+
+  .task-create input,
+  .task-create textarea,
+  .task-edit input,
+  .task-edit textarea {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .task-create button {
+    width: 100%;
+    min-height: 42px;
+  }
+
+  .create-project button {
+    width: 100%;
+    min-height: 42px;
+  }
+
+  .task-edit {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .task-edit-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
   }
 
   .summary {
@@ -481,6 +521,10 @@ h1 {
   .project-card,
   .create-project {
     padding: 14px;
+  }
+
+  .project-header {
+    gap: 12px;
   }
 
   .summary {

@@ -1,4 +1,4 @@
-import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateProjectInput } from './dto/create-project.input';
 import { Project } from './models/project.model';
 import { ProjectsService } from './projects.service';
@@ -37,5 +37,13 @@ export class ProjectsResolver {
     description: string | null,
   ) {
     return this.projectsService.update(id, name, description);
+  }
+
+  @Mutation(() => Project)
+  reorderProject(
+    @Args('id', { type: () => ID }) id: string,
+    @Args('sortOrder', { type: () => Int }) sortOrder: number,
+  ) {
+    return this.projectsService.reorder(id, sortOrder);
   }
 }
