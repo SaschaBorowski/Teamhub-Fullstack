@@ -175,6 +175,7 @@ export default function App() {
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [draggedProjectId, setDraggedProjectId] = useState<string | null>(null);
+  const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(null);
   const handleDrop = async (targetProjectId: string) => {
     if (!draggedProjectId || draggedProjectId === targetProjectId) {
       return;
@@ -228,6 +229,7 @@ export default function App() {
 
     // Drag-Status zurücksetzen
     setDraggedProjectId(null);
+    setDragOverProjectId(null);
   };
 
   // Lädt alle Projekte vom Backend
@@ -446,6 +448,13 @@ export default function App() {
               <ProjectCard
                 key={project.id}
                 project={project}
+                draggedProjectId={draggedProjectId}
+                dragOverProjectId={dragOverProjectId}
+                setDragOverProjectId={setDragOverProjectId}
+                onDragEnd={() => {
+                  setDraggedProjectId(null);
+                  setDragOverProjectId(null);
+                }}
                 onDragStart={() => setDraggedProjectId(project.id)}
                 onDrop={() => handleDrop(project.id)}
                 handleCreateTask={handleCreateTask}
@@ -513,6 +522,10 @@ export default function App() {
 // =====================================
 function ProjectCard({
   project,
+  draggedProjectId,
+  dragOverProjectId,
+  setDragOverProjectId,
+  onDragEnd,
   onDragStart,
   onDrop,
   handleCreateTask,
@@ -535,6 +548,10 @@ function ProjectCard({
   setEditedDescription,
 }: {
   project: Project;
+  draggedProjectId: string | null;
+  dragOverProjectId: string | null;
+  setDragOverProjectId: React.Dispatch<React.SetStateAction<string | null>>;
+  onDragEnd: () => void;
   onDragStart: () => void;
   onDrop: () => void;
   handleCreateTask: (
@@ -602,10 +619,19 @@ function ProjectCard({
 
   return (
     <article
-      className="project-card"
+      className={`project-card ${draggedProjectId === project.id ? 'dragging' : ''
+        } ${dragOverProjectId === project.id ? 'drag-over' : ''
+        }`}
       draggable
       onDragStart={onDragStart}
-      onDragOver={(e) => e.preventDefault()}
+      onDragEnd={onDragEnd}
+      onDragOver={(e) => {
+        e.preventDefault();
+
+        if (draggedProjectId !== project.id) {
+          setDragOverProjectId(project.id);
+        }
+      }}
       onDrop={onDrop}
     >
 
