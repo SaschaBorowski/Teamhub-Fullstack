@@ -26,6 +26,9 @@ This project is being developed to gain practical experience with:
 
 * Create projects from the UI
 * View all projects
+* Edit project name
+* Edit project description
+* Delete projects
 * Store projects in PostgreSQL
 
 ### Tasks
@@ -33,6 +36,11 @@ This project is being developed to gain practical experience with:
 * Create tasks from the UI
 * Assign tasks to projects
 * Update task status
+* Edit task title
+* Add task descriptions
+* View task descriptions
+* Edit task descriptions
+* Delete tasks
 * Persist task data in PostgreSQL
 
 ### Backend
@@ -40,6 +48,9 @@ This project is being developed to gain practical experience with:
 * GraphQL API
 * NestJS backend architecture
 * Prisma ORM integration
+* Project CRUD operations
+* Task CRUD operations
+* Prisma cascade delete for project tasks
 
 ### Infrastructure
 
@@ -88,125 +99,3 @@ NestJS
 Prisma
   ↓
 PostgreSQL
-```
-
----
-
-## Project Structure
-
-```text
-teamhub/
-├── apps/
-│   ├── frontend/
-│   └── backend/
-├── docker-compose.yml
-└── package.json
-```
-
----
-
-## Local Development
-
-### Prerequisites
-
-* Node.js 20+
-* npm
-* Docker Desktop
-
-### Install Dependencies
-
-```bash
-npm install
-```
-
-### Start PostgreSQL
-
-```bash
-docker compose up -d postgres
-```
-
-### Run Database Migrations
-
-```bash
-cd apps/backend
-npx prisma migrate dev
-```
-
-### Start Backend
-
-```bash
-cd apps/backend
-npm run dev
-```
-
-### Start Frontend
-
-```bash
-cd apps/frontend
-npm run dev
-```
-
-### URLs
-
-Frontend:
-
-```text
-http://localhost:5173
-```
-
-GraphQL API:
-
-```text
-http://localhost:4000/graphql
-```
-
----
-
-## Roadmap
-
-### Completed
-
-* [x] React frontend
-* [x] TypeScript setup
-* [x] NestJS backend
-* [x] GraphQL API
-* [x] Prisma integration
-* [x] PostgreSQL persistence
-* [x] Docker setup
-* [x] Create projects from UI
-* [x] Create tasks from UI
-* [x] Update task status from UI
-
-### Planned
-
-* [ ] Delete tasks
-* [ ] Delete projects
-* [ ] Task descriptions
-* [ ] Drag & Drop Kanban board
-* [ ] User authentication
-* [ ] Role-based permissions
-* [ ] NGINX reverse proxy
-* [ ] Kubernetes deployment
-* [ ] Azure deployment
-* [ ] CI/CD pipeline
-
----
-
-## Learning Objectives
-
-TeamHub serves as a practical learning platform for:
-
-* Full-stack application development
-* API design with GraphQL
-* Backend architecture with NestJS
-* Database design and ORM usage
-* Containerization with Docker
-* Cloud deployment workflows
-* Kubernetes orchestration
-* CI/CD automation
-
----
-
-## Status
-
-This project is actively under development and used as a hands-on learning platform to explore modern full-stack engineering practices.
