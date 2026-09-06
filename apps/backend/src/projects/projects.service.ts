@@ -32,4 +32,15 @@ export class ProjectsService {
       where: { id },
     });
   }
+
+  update(id: string, name: string, description: string | null) {
+    return this.prisma.project.update({
+      where: { id },
+      data: {
+        name,
+        description,
+      },
+      include: { tasks: true },
+    });
+  }
 }

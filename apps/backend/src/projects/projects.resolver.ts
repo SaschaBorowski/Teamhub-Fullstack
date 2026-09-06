@@ -29,4 +29,13 @@ export class ProjectsResolver {
     return this.projectsService.delete(id);
   }
 
+  @Mutation(() => Project)
+  updateProject(
+    @Args('id', { type: () => ID }) id: string,
+    @Args('name') name: string,
+    @Args('description', { type: () => String, nullable: true })
+    description: string | null,
+  ) {
+    return this.projectsService.update(id, name, description);
+  }
 }

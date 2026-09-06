@@ -23,6 +23,7 @@ type Mutation {
   createTask(input: CreateTaskInput!): Task!
   deleteProject(id: ID!): Project!
   deleteTask(id: ID!): Task!
+  updateProject(description: String, id: ID!, name: String!): Project!
   updateTaskStatus(id: ID!, status: TaskStatus!): Task!
   updateTaskTitle(description: String!, id: ID!, title: String!): Task!
 }

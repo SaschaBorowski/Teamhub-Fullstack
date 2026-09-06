@@ -60,6 +60,24 @@ const DELETE_PROJECT = gql`
   }
 `;
 
+const UPDATE_PROJECT = gql`
+  mutation UpdateProject(
+    $id: ID!
+    $name: String!
+    $description: String
+  ) {
+    updateProject(
+      id: $id
+      name: $name
+      description: $description
+    ) {
+      id
+      name
+      description
+    }
+  }
+`;
+
 const UPDATE_TASK_TITLE = gql`
   mutation UpdateTaskTitle(
     $id: ID!
@@ -140,12 +158,20 @@ export default function App() {
 
   const [editedDescription, setEditedDescription] = useState('');
 
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  const [editedProjectName, setEditedProjectName] = useState('');
+  const [editedProjectDescription, setEditedProjectDescription] = useState('');
+
   // Lädt alle Projekte vom Backend
   const { data, loading, error } =
     useQuery<{ projects: Project[] }>(PROJECTS_QUERY);
 
   // Mutation zum Erstellen eines Projekts
   const [createProject] = useMutation(CREATE_PROJECT, {
+    refetchQueries: [{ query: PROJECTS_QUERY }],
+  });
+
+  const [updateProject] = useMutation(UPDATE_PROJECT, {
     refetchQueries: [{ query: PROJECTS_QUERY }],
   });
 
@@ -202,6 +228,24 @@ export default function App() {
     // Formular zurücksetzen
     setName('');
     setDescription('');
+  };
+
+  const handleUpdateProject = async (
+    projectId: string,
+    name: string,
+    description: string
+  ) => {
+    if (!name.trim()) {
+      return;
+    }
+
+    await updateProject({
+      variables: {
+        id: projectId,
+        name,
+        description,
+      },
+    });
   };
 
   // Task erstellen
@@ -330,6 +374,13 @@ export default function App() {
                 editedDescription={editedDescription}
                 setEditedDescription={setEditedDescription}
                 handleDeleteProject={handleDeleteProject}
+                handleUpdateProject={handleUpdateProject}
+                editingProjectId={editingProjectId}
+                setEditingProjectId={setEditingProjectId}
+                editedProjectName={editedProjectName}
+                setEditedProjectName={setEditedProjectName}
+                editedProjectDescription={editedProjectDescription}
+                setEditedProjectDescription={setEditedProjectDescription}
               />
             ))
           ) : (
@@ -365,6 +416,7 @@ export default function App() {
           Projekt erstellen
         </button>
 
+
       </section>
 
     </main>
@@ -380,6 +432,13 @@ function ProjectCard({
   handleUpdateTaskStatus,
   handleDeleteTask,
   handleDeleteProject,
+  handleUpdateProject,
+  editingProjectId,
+  setEditingProjectId,
+  editedProjectName,
+  setEditedProjectName,
+  editedProjectDescription,
+  setEditedProjectDescription,
   editingTaskId,
   setEditingTaskId,
   editedTitle,
@@ -405,6 +464,30 @@ function ProjectCard({
   editingTaskId: string | null;
   setEditingTaskId: React.Dispatch<
     React.SetStateAction<string | null>
+  >;
+
+  handleUpdateProject: (
+    projectId: string,
+    name: string,
+    description: string
+  ) => Promise<void>;
+
+  editingProjectId: string | null;
+
+  setEditingProjectId: React.Dispatch<
+    React.SetStateAction<string | null>
+  >;
+
+  editedProjectName: string;
+
+  setEditedProjectName: React.Dispatch<
+    React.SetStateAction<string>
+  >;
+
+  editedProjectDescription: string;
+
+  setEditedProjectDescription: React.Dispatch<
+    React.SetStateAction<string>
   >;
 
   editedTitle: string;
@@ -435,11 +518,32 @@ function ProjectCard({
       <div className="project-header">
         <div>
 
-          {/* Projektname */}
-          <h2>{project.name}</h2>
+          {editingProjectId === project.id ? (
+            <div className="project-edit">
+              <input
+                type="text"
+                value={editedProjectName}
+                onChange={(e) => setEditedProjectName(e.target.value)}
+                placeholder="Projektname"
+              />
 
-          {/* Beschreibung */}
-          {project.description && <p>{project.description}</p>}
+              <textarea
+                value={editedProjectDescription}
+                onChange={(e) =>
+                  setEditedProjectDescription(e.target.value)
+                }
+                placeholder="Beschreibung"
+              />
+            </div>
+          ) : (
+            <>
+              {/* Projektname */}
+              <h2>{project.name}</h2>
+
+              {/* Beschreibung */}
+              {project.description && <p>{project.description}</p>}
+            </>
+          )}
 
         </div>
 
@@ -448,6 +552,46 @@ function ProjectCard({
           <span>
             {project.tasks.length} tasks
           </span>
+
+          {editingProjectId === project.id ? (
+            <>
+              <button
+                onClick={async () => {
+                  await handleUpdateProject(
+                    project.id,
+                    editedProjectName,
+                    editedProjectDescription
+                  );
+
+                  setEditingProjectId(null);
+                  setEditedProjectName('');
+                  setEditedProjectDescription('');
+                }}
+              >
+                💾
+              </button>
+
+              <button
+                onClick={() => {
+                  setEditingProjectId(null);
+                  setEditedProjectName('');
+                  setEditedProjectDescription('');
+                }}
+              >
+                ❌
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => {
+                setEditingProjectId(project.id);
+                setEditedProjectName(project.name);
+                setEditedProjectDescription(project.description ?? '');
+              }}
+            >
+              ✏️
+            </button>
+          )}
 
           <button
             onClick={() =>
